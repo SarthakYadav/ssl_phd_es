@@ -39,6 +39,7 @@ def setup_data(base_data_dir, file_id=None, BATCH_SIZE=128):
     if not os.path.exists(tar_path):
       print("Downloading data..")
       gdown.download(id=file_id)
+      sp.call(f"mv speechcommands_ssl_data.tar.gz {base_data_dir}", shell=True)
     else:
       print("Found tar file..")
     print("extracting data..")
