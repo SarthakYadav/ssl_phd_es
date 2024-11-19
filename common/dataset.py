@@ -28,24 +28,30 @@ class SpeechCommandsDataset(torch.utils.data.Dataset):
     return len(self.features)
 
 
-def setup_data(DATA_DIR, id="1WeHtbU0QlOCjo83YYkElX0XzQUYUnn5v", BATCH_SIZE=128):
+def setup_data(base_data_dir, file_id=None, BATCH_SIZE=128):
   import subprocess as sp
   import gdown
-  if not os.path.exists(DATA_DIR):
-    print("Downloading data..")
-    if not os.path.exists("./speechcommands_ssl_data.tar.gz"):
-      gdown.download(id=id)
+
+  data_dir = os.path.join(base_data_dir, "speechcommands_ssl_data")
+  tar_path = os.path.join(base_data_dir, "speechcommands_ssl_data.tar.gz")
+
+  if not os.path.exists(data_dir):
+    if not os.path.exists(tar_path):
+      print("Downloading data..")
+      gdown.download(id=file_id)
     else:
       print("Found tar file..")
     print("extracting data..")
-    sp.call("tar xf speechcommands_ssl_data.tar.gz", shell=True)
+    command = f"cd {base_data_dir} && tar xf speechcommands_ssl_data.tar.gz && cd -"
+    print(command)
+    sp.call(command, shell=True)
   else:
-    print(f"{DATA_DIR} exists..")
+    print(f"{data_dir} exists..")
 
-  train_dset = SpeechCommandsDataset(DATA_DIR, "train")
-  train_ssl_dset = SpeechCommandsDataset(DATA_DIR, "train_ssl")
-  val_dset = SpeechCommandsDataset(DATA_DIR, "valid")
-  test_dset = SpeechCommandsDataset(DATA_DIR, "test")
+  train_dset = SpeechCommandsDataset(data_dir, "train")
+  train_ssl_dset = SpeechCommandsDataset(data_dir, "train_ssl")
+  val_dset = SpeechCommandsDataset(data_dir, "valid")
+  test_dset = SpeechCommandsDataset(data_dir, "test")
 
   tr_dataloader = torch.utils.data.DataLoader(train_dset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
   tr_ssl_dataloader = torch.utils.data.DataLoader(train_ssl_dset, batch_size=BATCH_SIZE, num_workers=4, shuffle=True)
